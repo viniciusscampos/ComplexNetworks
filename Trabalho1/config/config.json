@@ -1,3 +1,4 @@
 {
-	"graph_names": ["/home/vinicius/Documents/Projects/ComplexNetworks/Trabalho1/datasets/polblogs/polblogs.gml"]
+	"datasets_folder": "/home/vinicius/Documents/Projects/ComplexNetworks/Trabalho1/datasets/",
+	"datasets" : ["web-Stanford"]
 }
