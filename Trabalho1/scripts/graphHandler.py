@@ -1,6 +1,6 @@
 import json
 import glob
-import graph_tool.all as gt
+from graph_tool.all import *
 from numpy import *
 
 class graph:
@@ -26,14 +26,22 @@ class graph:
 			g.save("{}converted/{}.gt".format(self.datasets_folder,file_name))
 
 
-	def calculate_metrics(self):		
+	def save_graphs_metrics_file(self):		
 		graph_files = glob.glob("{}/converted/*.gt".format(self.datasets_folder))
 		for graph_absolute_path in graph_files:
 			graph_name = graph_absolute_path.split("/")[-1]
-			g = gt.load_graph(graph_absolute_path)
+			g = load_graph(graph_absolute_path)			
+			data = {"name": graph_name}
 			# Calculate the strongly connected components
-			l = gt.label_largest_component(g)
-			u = gt.GraphView(g,vfilt=l)
+			#l = gt.label_largest_component(g)
+			#u = gt.GraphView(g,vfilt=l)
+			# Calculate graph degrees metrics
+			data["degrees"] = self.calculate_degrees(g)
+			print(data)
+			# Create a file to store the informations
+
+
+
 			
 	def calculate_degrees(self,g):
 		"""Receive a graph as a parameter and return the degree metrics for the graph."""
@@ -41,18 +49,20 @@ class graph:
 			outDegrees = g.get_out_degrees(g.get_vertices())
 			inDegrees = g.get_in_degrees(g.get_vertices())
 
-			outDegreesMetrics = this.get_metrics(outDegrees)
-			inDegreesMetrics = this.get_metrics(inDegrees)
+			outDegreesMetrics = self.get_metrics(outDegrees)
+			inDegreesMetrics = self.get_metrics(inDegrees)
 			return {"isDirected": True, "outDegreesMetrics": outDegreesMetrics, "inDegreesMetrics": inDegreesMetrics}	
 		else:
 			outDegrees = g.get_out_degrees(g.get_vertices())
-			outDegreesMetrics = this.get_metrics(outDegrees)
+			outDegreesMetrics = self.get_metrics(outDegrees)
 			return {"isDirected": False, "outDegreesMetrics": outDegreesMetrics}
+
+
 
 	def get_metrics(self,a):
 		"""Receives an array as parameters and return an dictionary containing their min,max,mean and standard deviation metrics. """
 		return {"min": amin(a),"max":amax(a),"mean": mean(a), "standard-deviation": std(a) }
 
 
-#g = graph()
-#g.calculate_metrics()
+g = graph()
+g.save_graphs_metrics_file()
