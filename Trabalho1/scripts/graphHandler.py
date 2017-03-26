@@ -6,12 +6,12 @@ from numpy import *
 class graph:
 	def __init__(self):
 		self.configuration = json.loads(open('../config/config.json').read())
-		self.datasets_folder = self.configuration["datasets_folder"]
+		self.project_folder = self.configuration["project_folder"]
 		self.datasets = self.configuration["datasets"]
 
 	def file_converter(self):
 		for file_name in self.datasets:
-			file = open("{}{}.txt".format(self.datasets_folder,file_name), "read")		
+			file = open("{}datasets/{}.txt".format(self.project_folder,file_name), "read")		
 			g = Graph()
 			v_id = g.new_vertex_property("int")
 			for line in file:
@@ -23,24 +23,23 @@ class graph:
 					v1 = int(nodes[0]) - 1 
 					v2 = int(nodes[1]) - 1
 					g.add_edge(v1,v2)
-			g.save("{}converted/{}.gt".format(self.datasets_folder,file_name))
+			g.save("{}datasets/converted/{}.gt".format(self.project_folder,file_name))
 
 
 	def save_graphs_metrics_file(self):		
-		graph_files = glob.glob("{}/converted/*.gt".format(self.datasets_folder))
+		graph_files = glob.glob("{}/datasets/converted/*.gt".format(self.project_folder))
 		for graph_absolute_path in graph_files:
 			graph_name = graph_absolute_path.split("/")[-1]
-			g = load_graph(graph_absolute_path)			
-			data = {"name": graph_name}
+			g = load_graph(graph_absolute_path)						
+			data = {"name": graph_name, "isDirected": g.is_directed()}
 			# Calculate the strongly connected components
 			#l = gt.label_largest_component(g)
 			#u = gt.GraphView(g,vfilt=l)
 			# Calculate graph degrees metrics
-			data["degrees"] = self.calculate_degrees(g)
-			print(data)
-			# Create a file to store the informations
-
-
+			data["degrees"] = self.calculate_degrees(g)			
+			# Create a file to store the informations						
+			with open('{}results/files/{}-results.json'.format(self.project_folder,graph_name.split(".")[0]),'w') as f:
+				json.dump(str(data),f)
 
 			
 	def calculate_degrees(self,g):
@@ -51,13 +50,11 @@ class graph:
 
 			outDegreesMetrics = self.get_metrics(outDegrees)
 			inDegreesMetrics = self.get_metrics(inDegrees)
-			return {"isDirected": True, "outDegreesMetrics": outDegreesMetrics, "inDegreesMetrics": inDegreesMetrics}	
+			return {"outDegreesMetrics": outDegreesMetrics, "inDegreesMetrics": inDegreesMetrics}
 		else:
 			outDegrees = g.get_out_degrees(g.get_vertices())
 			outDegreesMetrics = self.get_metrics(outDegrees)
-			return {"isDirected": False, "outDegreesMetrics": outDegreesMetrics}
-
-
+			return {"outDegreesMetrics": outDegreesMetrics}
 
 	def get_metrics(self,a):
 		"""Receives an array as parameters and return an dictionary containing their min,max,mean and standard deviation metrics. """

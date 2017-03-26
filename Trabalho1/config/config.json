@@ -1,4 +1,4 @@
 {
-	"datasets_folder": "/home/vinicius/Documents/Projects/ComplexNetworks/Trabalho1/datasets/",
+	"project_folder": "/home/vinicius/Documents/Projects/ComplexNetworks/Trabalho1/",
 	"datasets" : ["web-Stanford"]
 }
