@@ -36,15 +36,18 @@ class graph:
 			graph_name = graph_absolute_path.split("/")[-1]
 			g = load_graph(graph_absolute_path)						
 			data = {"name": graph_name, "isDirected": g.is_directed()}
+			name = graph_name.split(".")[0]
 			# Calculate graph degrees metrics
-			data["degrees"] = self.calculate_degrees(g,graph_name.split(".")[0])
+			data["degrees"] = self.calculate_degrees(g,name)
+			# Calculate graph page rank metrics
+			data["page rank"] = self.calculate_page_rank(g,name)
 			# Create a file to store the informations						
 			with open('{}results/files/{}-results.json'.format(self.project_folder,graph_name.split(".")[0]),'w') as f:
 				json.dump(str(data),f)
 
 			
 	def calculate_degrees(self,g,name):
-		"""Receive a graph as a parameter and return the degree metrics for the graph."""
+		"""Receive a graph and a name as a parameter and return the degree metrics for the graph."""
 		if(g.is_directed):
 			outDegrees = g.get_out_degrees(g.get_vertices())
 			inDegrees = g.get_in_degrees(g.get_vertices())
@@ -53,20 +56,10 @@ class graph:
 			inDegreesMetrics = self.get_metrics(inDegrees)
 
 			# Generate the ECDF of the out degrees
-			ecdf = ECDF(outDegrees)
-			x = np.linspace(min(outDegrees),max(outDegrees))
-			y = ecdf(x)
-			plt.step(x,y)
-			plt.xlabel("empirical cdf outDegree")
-			plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,"outDegrees"))
-
+			self.plot_ecdf(outDegrees,name,"outDegrees")
+			
 			# Generate the ECDF of the in degrees
-			ecdf = ECDF(inDegrees)
-			x = np.linspace(min(inDegrees),max(inDegrees))
-			y = ecdf(x)
-			plt.step(x,y)
-			plt.xlabel("empirical cdf inDegree")
-			plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,"inDegrees"))
+			self.plot_ecdf(inDegrees,name,"inDegrees")			
 
 			return {"outDegreesMetrics": outDegreesMetrics, "inDegreesMetrics": inDegreesMetrics}
 		else:
@@ -74,19 +67,30 @@ class graph:
 			outDegreesMetrics = self.get_metrics(outDegrees)
 
 			# Generate the ECDF of the out degrees
-			ecdf = ECDF(outDegrees)
-			x = np.linspace(min(outDegrees),max(outDegrees))
-			y = ecdf(x)
-			plt.step(x,y)
-			plt.xlabel("empirical cdf outDegree")
-			plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,"outDegrees"))
-
+			self.plot_ecdf(outDegrees,name,"outDegrees")
 
 			return {"outDegreesMetrics": outDegreesMetrics}
+
+	def calculate_page_rank(self,g,name):
+		"""Receive a graph and a name as a parameter and return the page rank metrics for the graph."""
+		page_rank = pagerank(g).a
+		page_rank_metrics = self.get_metrics(page_rank)
+		# Generate the ECDF of the page rank
+		self.plot_ecdf(page_rank,name,"page-rank")
+		return page_rank_metrics
 		
 	def get_metrics(self,a):
 		"""Receives an array as parameters and return an dictionary containing their min,max,mean and standard deviation metrics. """
 		return {"min": np.amin(a),"max":np.amax(a),"mean": np.mean(a), "standard-deviation": np.std(a) }
+
+	def plot_ecdf(self,a,name,p):
+		"""Create and save the respectively ecdf to an given array with given name."""
+		ecdf = ECDF(a)
+		x = np.linspace(min(a),max(a))
+		y = ecdf(x)
+		plt.step(x,y)
+		plt.xlabel("empirical cdf {}".format(p))
+		plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,p))
 
 
 g = graph()
