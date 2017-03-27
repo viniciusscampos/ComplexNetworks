@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from graph_tool.all import *
 import numpy as np
 
-class graph:
+class GrahHandler:
 	def __init__(self):
 		self.configuration = json.loads(open('../config/config.json').read())
 		self.project_folder = self.configuration["project_folder"]
@@ -24,8 +24,11 @@ class graph:
 					g.add_vertex(total_nodes)
 				if not line.startswith("#"):
 					nodes = line.split("	")
-					v1 = int(nodes[0]) - 1 
-					v2 = int(nodes[1]) - 1
+					v1 = int(nodes[0])
+					v2 = int(nodes[1])
+					if file_name == "web-Stanford":
+						v1 = v1 - 1 
+						v2 = v2 - 1
 					g.add_edge(v1,v2)
 			g.save("{}datasets/converted/{}.gt".format(self.project_folder,file_name))
 
@@ -40,13 +43,15 @@ class graph:
 			# Calculate graph degrees metrics
 			data["degrees"] = self.calculate_degrees(g,name)
 			# Calculate graph page rank metrics
-			#data["page rank"] = self.calculate_page_rank(g,name)
+			data["page rank"] = self.calculate_page_rank(g,name)
 			# Calculate graph components
-			#data["page rank"] = self.calculate_page_rank(g,name)
 			data["components"] = self.calculate_components(g,name)
+			# Calculate graph components
+			data["local-clustering"] = self.calculate_local_clustering(g,name)
 			# Create a file to store the informations						
-			with open('{}results/files/{}-results.json'.format(self.project_folder,graph_name.split(".")[0]),'w') as f:
-				json.dump(str(data),f)
+			with open('{}results/files/{}-results.json'.format(self.project_folder,name),'w') as f:
+				json.dump(str(data),f)		
+
 
 			
 	def calculate_degrees(self,g,name):
@@ -97,6 +102,13 @@ class graph:
 		self.plot_ecdf(components,name,"components")
 		return components_metrics
 		
+	def calculate_local_clustering(self,g,name):
+		# Get an array containing the local clustering coefficient of each vertex.
+		lc = local_clustering(g).a
+		lc_metrics = self.get_metrics(lc)
+		self.plot_ecdf(lc,name,"local-clustering")
+		return lc_metrics
+
 	def get_metrics(self,a):
 		"""Receives an array as parameters and return an dictionary containing their min,max,mean and standard deviation metrics. """
 		return {"min": np.amin(a),"max":np.amax(a),"mean": np.mean(a), "standard-deviation": np.std(a) }
@@ -111,5 +123,7 @@ class graph:
 		plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,p))
 
 
-g = graph()
+
+g = GrahHandler()
+#g.file_converter()
 g.save_graphs_metrics_file()
