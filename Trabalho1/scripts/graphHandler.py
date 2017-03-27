@@ -40,7 +40,10 @@ class graph:
 			# Calculate graph degrees metrics
 			data["degrees"] = self.calculate_degrees(g,name)
 			# Calculate graph page rank metrics
-			data["page rank"] = self.calculate_page_rank(g,name)
+			#data["page rank"] = self.calculate_page_rank(g,name)
+			# Calculate graph components
+			#data["page rank"] = self.calculate_page_rank(g,name)
+			data["components"] = self.calculate_components(g,name)
 			# Create a file to store the informations						
 			with open('{}results/files/{}-results.json'.format(self.project_folder,graph_name.split(".")[0]),'w') as f:
 				json.dump(str(data),f)
@@ -78,6 +81,21 @@ class graph:
 		# Generate the ECDF of the page rank
 		self.plot_ecdf(page_rank,name,"page-rank")
 		return page_rank_metrics
+
+	def calculate_components(self,g,name):
+		# Get an array containing the label of each component that the vertex i belongs.
+		components = label_components(g)[0].a
+		# Construct a dictionary mapping a component with it size.	
+		data = {}
+		for c in components:
+			if c not in data:
+				data[c] = 1
+				continue
+			elif c in data:
+				data[c] = data[c] + 1
+		components_metrics = self.get_metrics(data.values())
+		self.plot_ecdf(components,name,"components")
+		return components_metrics
 		
 	def get_metrics(self,a):
 		"""Receives an array as parameters and return an dictionary containing their min,max,mean and standard deviation metrics. """
