@@ -119,7 +119,7 @@ class GrahHandler:
 		x = np.linspace(min(a),max(a))
 		y = ecdf(x)
 		plt.step(x,y)
-		plt.xlabel("empirical cdf {}".format(p))
+		plt.title("{} {} empirical cdf".format(name,p))
 		plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,p))
 		plt.close()
 
