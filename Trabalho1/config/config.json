@@ -1,4 +1,4 @@
 {
 	"project_folder": "/home/vinicius/Documents/Projects/ComplexNetworks/Trabalho1/",
-	"datasets" : ["web-Stanford","Email-EuAll","web-NotreDame","web-Google"]
+	"datasets" : ["web-Stanford","web-NotreDame","web-Google"]
 }

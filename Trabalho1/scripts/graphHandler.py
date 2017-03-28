@@ -121,6 +121,7 @@ class GrahHandler:
 		plt.step(x,y)
 		plt.xlabel("empirical cdf {}".format(p))
 		plt.savefig('{}results/images/{}-{}-ecdf.png'.format(self.project_folder,name,p))
+		plt.close()
 
 
 
